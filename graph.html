@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Орентированный граф</title>
+</head>
+<body>
+   
+    <div id="container">
+        <nav>
+            <ul>
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="">Проекты</a>
+                <!-- First Tier Drop Down -->
+                <ul>
+                    <li><a href="">Ориентированные графы</a></li>
+                    <li><a href="neuron.html">Нейронная игра жизнь</a></li>
+                </ul>
+                </li>
+        </nav>
+    </div>
+    <div>
+        Ориентированный граф (кратко орграф) — (мульти) граф, рёбрам которого присвоено направление. Направленные рёбра именуются также дугами, а в некоторых источниках и просто рёбрами. Граф, ни одному ребру которого не присвоено направление, называется неориентированным графом или неорграфом.
+    </div>
+    <div>
+        Ниже предоставлен доступ для создания орентированных графов.
+        <ol>Необходимо задать размер матрицы смежности</ol>
+        <ol>Необходимо заполнить матрицу смежности, где 1 - это входит вершина в другую, а 0 - это значит не входит</ol>
+        <ol>Построить</ol>
+    </div>
+        <input type="text" size = "4" maxlength="5" id = "size">
+    <br>
+    <button style = "margin-top: 10px;" onclick = "createMatrix()" id = "button" formtarget="_blank">
+        Построить матрицу
+    </button>
+    <br>
+    <button onclick="restart()">Restart</button>
+    <script type="text/javascript">
+        function createMatrix()
+{
+//Получение данных со страницы
+    var size = document.getElementById('size').value;
+ //Создание таблицы
+    var table = document.createElement('table');
+    var div = document.createElement('div');
+    var string = '\0';
+        for(var i = 0; i < size; i++)
+    {
+        string += "<tr>";
+        for(var ii = 0; ii < size; ii++)
+        {
+            if (i ===ii)
+            {
+                string += `<td><input disabled style = 'text-align:center; background:#ffffff; color:#000000' type='text' size = '2' maxlength = '1' value = '0' id = ${i*4+ii}><td>`;
+            }
+            else
+            {
+                string += `<td><input style = 'text-align:center' type='text' size = '2' maxlength = '1' value = '1'id = ${i*4+ii}><td>`;
+            }
+        }
+        string += "</tr>";
+    }
+    table.innerHTML = string;
+    div.innerHTML = "<button id ='gButton' onclick ='createGraph()'>Создать граф</button>"
+    table.setAttribute('style', 'border-right: 2px solid #123889;border-left: 2px solid #123889;');
+    //Добавление на страницу
+    document.body.appendChild(table);
+    document.body.appendChild(div);
+}
+
+function restart()
+{
+    location.reload();
+}
+
+function createGraph()
+{
+//Получение кол-ва вершин
+    var number = document.getElementById('size').value;
+//Создание холста
+    var div_canvas = document.createElement('div');
+    div_canvas.innerHTML = "<canvas width = '600px' height = '500px' id = 'canvas'></canvas>";
+    document.body.appendChild(div_canvas);
+//Добавлние возможности рисовать на поле
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+//Очистка холста
+    ctx.clearRect(0,0,600,500);
+//Сбор данных из матрицы
+    var adjacencyMatrix = new Array(number);
+    for(var i = 0; i < number; i++)
+    {
+        adjacencyMatrix[i] = new Array(number);
+    }
+    for(var i = 0; i < number; i++)
+    {
+        for(var ii = 0; ii < number; ii++)
+        {
+            adjacencyMatrix[i][ii] = document.getElementById(`${i*4+ii}`).value;
+        }
+    }
+//Функция для создания вершин
+    function createCircle(x,y)
+    {
+        ctx.beginPath();
+        ctx.arc(x,y,10,0,Math.PI*2);
+        ctx.stroke();
+    }
+// Функция для создания треугольника и кручения его по часовой
+    function ribsAndVertex(x,y,count)
+    {
+//Расположение вершин графа по кругу
+        for(var i = 1; i <= count; i++)
+        {
+            createCircle(150+x*Math.cos(Math.PI*i*2/count), 75+y*Math.sin(Math.PI*i*2/count));
+            ctx.strokeStyle = "red";
+            ctx.font = "10px Comic Sans MS";
+            ctx.strokeText(`${i}`,150+x*Math.cos(Math.PI*i*2/count), 75+y*Math.sin(Math.PI*i*2/count));
+            ctx.strokeStyle = "white";
+        }
+//Функция создания стрелки
+    function createArrow(context, fromx, fromy, tox, toy)
+    {
+        var headlen = 10;
+        var dx = tox - fromx;
+        var dy = toy - fromy;
+        var angle = Math.atan2(dy, dx);
+        context.moveTo(fromx, fromy);
+        context.lineTo(tox, toy);
+        context.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+        context.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+        context.lineTo(tox, toy);
+    }
+
+//Проведение ребер
+        for(var i = 0; i < count;i++)
+        {
+            for(var ii = 0; ii < count; ii++)
+            {
+                if (adjacencyMatrix[i][ii] == 1)
+                {                   
+                    var fromX = 150+x*Math.cos(Math.PI*(i+1)*2/count) - 10*Math.cos(Math.PI*(i+1)*2/count);
+                    var fromY = 75+y*Math.sin(Math.PI*(i+1)*2/count) - 10*Math.sin(Math.PI*(i+1)*2/count);
+                    var toX = 150+x*Math.cos(Math.PI*(ii+1)*2/count)  - 10*Math.cos(Math.PI*(ii+1)*2/count);
+                    var toY = 75+y*Math.sin(Math.PI*(ii+1)*2/count) - 10*Math.sin(Math.PI*(ii+1)*2/count);
+                    createArrow(ctx, fromX,fromY,toX,toY);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    ribsAndVertex(60,60,number);
+}
+    </script>
+</body>
